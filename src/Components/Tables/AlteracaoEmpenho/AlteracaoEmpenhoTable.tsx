@@ -17,9 +17,12 @@ export function AlteracaoEmpenhoTable(props : {idEmpenho : number}) {
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const queryClient = useQueryClient();
-  const handleChangePage = (event: unknown, newPage: number) => 
-  {
-    setPage(newPage);
+  const handleChangePage = (event: React.MouseEvent<HTMLButtonElement>|null, newPage: number) => {
+    if (event && event.isTrusted){ 
+      setPage(newPage)
+      return
+    }
+    setPage(newPage)
   };
   const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => 
   {

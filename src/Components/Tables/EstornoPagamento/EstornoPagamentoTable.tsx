@@ -19,9 +19,13 @@ import { GetEstornoPagamentosResponse } from '../../../@types/DespesasResponse';
 export function EstornoPagamentoTable(props : {idPagamento : number}) {
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const handleChangePage = (event: unknown, newPage: number) => 
-  {
-    setPage(newPage);
+  
+  const handleChangePage = (event: React.MouseEvent<HTMLButtonElement>|null, newPage: number) => {
+    if (event && event.isTrusted){ 
+      setPage(newPage)
+      return
+    }
+    setPage(newPage)
   };
   const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => 
   {

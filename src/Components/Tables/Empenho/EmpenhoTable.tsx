@@ -27,7 +27,11 @@ export function EmpenhoTable() {
   const queryClient = useQueryClient();
  
   //funcao chamada ao chamar a proxima pagina, ou seja, revalidacao da query, mas passando o valor atualizado da pagina
-  const handleChangePage = (event: unknown, newPage: number) => setPage(newPage);
+  const handleChangePage = (event: React.MouseEvent<HTMLButtonElement>|null, newPage: number) => {
+    if (event && event.isTrusted) setPage(newPage)
+
+    setPage(newPage)
+  };
   
   //funcao chamada ao fazer a troca da quantidade de linhas por pagina, logo, realizar a query novamente, mas passando uma quantidade maior de limit
   const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => 
