@@ -20,6 +20,7 @@ import { GetEmpenhoResponse } from '../../../@types/DespesasResponse';
  * @returns 
  */
 export function EmpenhoTable() {
+
   const [ searchParams, setSearchParams ] = useSearchParams();
   const [ isOpenMenu, setIsOpenMenu ] = useState(false);
   const [ page, setPage ] = useState(0);
@@ -29,7 +30,6 @@ export function EmpenhoTable() {
   //funcao chamada ao chamar a proxima pagina, ou seja, revalidacao da query, mas passando o valor atualizado da pagina
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement>|null, newPage: number) => {
     if (event && event.isTrusted) setPage(newPage)
-
     setPage(newPage)
   };
   
@@ -37,10 +37,10 @@ export function EmpenhoTable() {
   const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => 
   {
     const newCountOfRows = +event.target.value; 
-    setRowsPerPage(newCountOfRows)
-    setPage(0) //volta para a primeira pagina ao mudar o numero de linhas por pagina;
+    setRowsPerPage(newCountOfRows);
+    setPage(0); //volta para a primeira pagina ao mudar o numero de linhas por pagina;
   };
-  const { data , isFetching, isSuccess, isError } = useQuery({
+  const { data:response , isFetching, isSuccess, isError } = useQuery({
     queryFn : async () => {
       await delay();
       const query = new URLSearchParams();
@@ -48,13 +48,12 @@ export function EmpenhoTable() {
       query.append("Page", (page+1).toString());
       query.append("Limit", (rowsPerPage).toString());
       query.append("NuEmpenho", searchParams.get("NuEmpenho") ?? "");
-      query.append("InitialDate", searchParams.get("InitialDate") ?? "");
-      query.append("EndDate", searchParams.get("EndDate") ?? "");
-      query.append("TotalmentePago", searchParams.get("TotalmentePago") ?? "false");
+      query.append("DataInicial", searchParams.get("DataInicial") ?? "");
+      query.append("DataFinal", searchParams.get("DataFinal") ?? "");
+      query.append("TotalPago", searchParams.get("TotalPago") ?? "false");
       query.append("VlMinimo", searchParams.get("VlMinimo") ?? "0");
 
-      const response = await api.get<GetEmpenhoResponse>(`despesas/getempenhos`, { params : query});
-      console.log(response.data.empenhos);
+      const response = await api.get<GetEmpenhoResponse>(`despesas/empenhos`, { params : query});
       return response.data;
     },
     queryKey : ["get-empenhos"],
@@ -106,7 +105,7 @@ export function EmpenhoTable() {
             <TableCell className='dark:text-zinc-100 text-md font-bold' align='center'>Tipo Empenho</TableCell>
             <TableCell className='dark:text-zinc-100 text-md font-bold' align='center'>Natureza despesa</TableCell>
             <TableCell className='dark:text-zinc-100 text-md font-bold' align='center'>Tipo despesa</TableCell>
-            <TableCell className='dark:text-zinc-100 text-md font-bold' align="right">Credor</TableCell>
+            <TableCell className='dark:text-zinc-100 text-md font-bold' align="center">Credor</TableCell>
             <TableCell className='dark:text-zinc-100 text-md font-bold' align="right">Liquidado</TableCell>
             <TableCell className='dark:text-zinc-100 text-md font-bold' align="right">Pago</TableCell>
             <TableCell className='dark:text-zinc-100 text-md font-bold' align="right">A pagar</TableCell>
@@ -115,7 +114,7 @@ export function EmpenhoTable() {
         </TableHead>
         <TableBody>
           {
-            !isFetching && !data && isSuccess && (
+            !isFetching && !response && isSuccess && (
               <TableFooter className='text-3xl dark:text-zinc-200 w-fit absolute top-40 left-20 m-auto opacity-60 text-center flex items-center gap-3
               '>
                 Nenhum Empenho foi encontrado. <BoxIcon />
@@ -123,10 +122,10 @@ export function EmpenhoTable() {
             )
           }
           {
-            data?.empenhos && data?.empenhos.length > 0 && isSuccess &&  (
+            response?.data && response?.data.length > 0 && isSuccess &&  (
               <>
                 {
-                  data.empenhos.map((row) => (
+                  response?.data.map((row) => (
                     <EmpenhoRow key={row.nuEmpenho} row={row} />
                   ))
                 }
@@ -139,16 +138,16 @@ export function EmpenhoTable() {
       {
         isFetching && (
           <div className='flex flex-col gap-2 dark:bg-zinc-800'>
-             {
-              [1,2,3,4,5].map((key) => (
-                <Skeleton 
-                  animation="wave" 
-                  key={key} 
-                  variant='rectangular' 
-                  className='dark:bg-zinc-600 p-7'
-                />
-              ))
-            }
+          {
+            [1,2,3,4,5].map((key) => (
+              <Skeleton 
+                animation="wave" 
+                key={key} 
+                variant='rectangular' 
+                className='dark:bg-zinc-600 p-7'
+              />
+            ))
+          }
           </div>
         )
       }
@@ -157,18 +156,18 @@ export function EmpenhoTable() {
           <TablePagination
             labelDisplayedRows={
               (args) => (
-                <>  {args.from} - {args.to} de {data.count} itens</>
+                <>  {args.from} - {args.to} de {response?.count} itens</>
               )
             }
             labelRowsPerPage="Itens por página"
             className='dark:bg-zinc-800 dark:text-zinc-50'
             component="div"
             rowsPerPage={rowsPerPage}
-            count={data.count ?? 0}
+            count={response?.count ?? 0}
             page={page}
             onPageChange={handleChangePage} 
             onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+          />
         )
       }
       {

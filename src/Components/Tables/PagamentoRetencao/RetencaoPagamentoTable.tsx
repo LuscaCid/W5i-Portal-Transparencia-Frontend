@@ -36,10 +36,10 @@ export function PagamentoRetencaoTable(props : {idPagamento : number}) {
 
         queryClient.invalidateQueries({queryKey : []});
     };
-    const { data, isFetching, isSuccess } = useQuery({
+    const { data: response, isFetching, isSuccess } = useQuery({
         queryFn : async () => {
             await delay();
-            const response = await api.get<GetPagamentoRetencoesResponse>(`despesas/getpagamentoretencoes?IdPagamento=${props.idPagamento}&Page=${page+1}&Limit=${rowsPerPage}`);
+            const response = await api.get<GetPagamentoRetencoesResponse>(`despesas/pagamentoRetencoes?idPagamento=${props.idPagamento}&Page=${page+1}&Limit=${rowsPerPage}`);
             console.log(response);
             return response.data;
         },
@@ -73,10 +73,10 @@ export function PagamentoRetencaoTable(props : {idPagamento : number}) {
                         </TableHead>
                         <TableBody>
                             {
-                                !isFetching && data?.pagamentoRetencoes && data.pagamentoRetencoes.length > 0 && (
+                                !isFetching && response?.data && response?.data.length > 0 && (
                                 <>
                                     {
-                                    data.pagamentoRetencoes.map((row) => (
+                                    response?.data.map((row) => (
                                         <PagamentoRetencaoRow key={row.idPagamentoRetencao} row={row} />
                                     ))
                                     }
@@ -94,7 +94,7 @@ export function PagamentoRetencaoTable(props : {idPagamento : number}) {
                 )
             }
             {
-                isSuccess && !data && (
+                !isFetching && isSuccess && response.data.length == 0 &&(
                 <span className='text-2xl flex items-center gap-2 w-fit absolute z-40 top-32 left-32 m-auto text-center opacity-70'>
                     Nenhum estorno deste pagamento foi encontrado... <PackageOpen />
                 </span>
@@ -105,14 +105,14 @@ export function PagamentoRetencaoTable(props : {idPagamento : number}) {
                 <TablePagination
                     labelDisplayedRows={
                         (args) => (
-                        <>  {args.from} - {args.to} de {data.count} itens</>
+                        <>  {args.from} - {args.to} de {response.count} itens</>
                         )
                     }
                     labelRowsPerPage="Itens por página"
                     className='dark:bg-zinc-800 dark:text-zinc-50'
                     component="div"
                     rowsPerPage={rowsPerPage}
-                    count={data.count}
+                    count={response.count}
                     page={page}
                     onPageChange={handleChangePage} 
                     onRowsPerPageChange={handleChangeRowsPerPage}

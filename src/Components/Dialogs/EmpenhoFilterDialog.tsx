@@ -4,12 +4,13 @@ import { Theme, useThemeContext } from "../../Store/Theme";
 import { TitleWithProgress } from "../TitleWithProgress";
 import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 interface FormTypeSchema {
-    InitialDate? : string;
-    EndDate? : string;
+    DataInicial? : string;
+    DataFinal? : string;
     NuEmpenho? : string;
     VlMinimo? : number;
-    TotalmentePago? : boolean;
+    TotalPago? : boolean;
 };
 type keyofForm = keyof FormTypeSchema;
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -31,10 +32,10 @@ interface Props {
  */
 export function EmpenhoFilterDialog ({ isOpenMenu, onClose } : Props) {
     const [, setSearchParams ] = useSearchParams();
-    
+    const queryClient = useQueryClient();
     const theme = useThemeContext(state => state.theme);
     const { register, handleSubmit, setValue, watch } = useForm<FormTypeSchema>();
-    const totalPaydWatched = watch("TotalmentePago"); 
+    const totalPaydWatched = watch("TotalPago"); 
     /**
      * @summary : Metodo que vai enviar os dados à query para que haja a consulta mais detalhada dos empenhos
      * @param data 
@@ -48,6 +49,7 @@ export function EmpenhoFilterDialog ({ isOpenMenu, onClose } : Props) {
             }
         });
         setSearchParams(searchParams);
+        queryClient.invalidateQueries({queryKey : ["get-empenhos"]});
         onClose();
     };
     return(
@@ -92,7 +94,7 @@ export function EmpenhoFilterDialog ({ isOpenMenu, onClose } : Props) {
                                 Data de ínicio: 
                             </label>
                             <Input
-                                {...register("InitialDate")}
+                                {...register("DataInicial")}
                                 color="info"
                                 type="date" id="initial-date" 
                                 className="dark:text-white w-full"
@@ -101,7 +103,7 @@ export function EmpenhoFilterDialog ({ isOpenMenu, onClose } : Props) {
                         <fieldset className="flex flex-col w-full gap-1">
                             <label htmlFor="end-date" className="font-semibold text-md">Data de Fim: </label>
                             <Input
-                                {...register("EndDate")}
+                                {...register("DataFinal")}
                                 color="info"
                                 type="date" id="end-date" 
                                 className="dark:text-white"
@@ -132,8 +134,8 @@ export function EmpenhoFilterDialog ({ isOpenMenu, onClose } : Props) {
                         <fieldset className="flex flex-col w-full gap-1">
                             <label htmlFor="totalmente-pagos" className="font-semibold text-md">Trazer apenas os totalmente pagos: </label>
                             <Switch 
-                                {...register("TotalmentePago")}
-                                onClick={() => setValue("TotalmentePago", !totalPaydWatched)}
+                                {...register("TotalPago")}
+                                onClick={() => setValue("TotalPago", !totalPaydWatched)}
                                 color="info" 
                                 id="totalmente-pagos" 
                             />

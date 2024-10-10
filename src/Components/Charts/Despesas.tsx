@@ -34,7 +34,7 @@ export function DespesasCharts (){
   });
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(2022, 0, 20),
-    to: addDays(new Date(2024, 0, 20), 20),
+    to: addDays(new Date(2024, 12, 20), 20),
   })
   const { 
     data : chartsData, 
@@ -48,10 +48,11 @@ export function DespesasCharts (){
       
       const urlSearchParams = new URLSearchParams();
 
-      urlSearchParams.append("DataInicio", new Date(date!.from!).getFullYear().toString() );
-      urlSearchParams.append("DataFim", new Date(date!.to!).getFullYear().toString() );
-
-      const response = await api.get<ResultsProps[]>(`despesas/getempenhobarchartdata`, { params : urlSearchParams});
+      urlSearchParams.append("DataInicial", new Date(date!.from!).getFullYear().toString() );
+      urlSearchParams.append("DataFinal", new Date(date!.to!).getFullYear().toString() );
+      
+      const response = await api.get<ResultsProps[]>(`charts/despesasBarCharts`, { params : urlSearchParams});
+      console.log(response.data);
       return response.data;
     }
   });

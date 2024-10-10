@@ -25,9 +25,9 @@ export function ItensEmpenhoTable(props : {idEmpenho : number}) {
   };
   const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => setRowsPerPage(+event.target.value);
 
-  const { data, isLoading, isSuccess } = useQuery({
+  const { data: response, isLoading, isSuccess } = useQuery({
     queryFn : async () => {
-      const response = await api.get<GetItensEmpenhoResponse>(`despesas/getitensempenho?IdEmpenho=${props.idEmpenho}&Page=${page+1}&Limit=${rowsPerPage}`);
+      const response = await api.get<GetItensEmpenhoResponse>(`despesas/itensEmpenho?idEmpenho=${props.idEmpenho}&Page=${page+1}&Limit=${rowsPerPage}`);
       return response.data;
     },
     queryKey : ["get-itens-empenho"],
@@ -57,10 +57,10 @@ export function ItensEmpenhoTable(props : {idEmpenho : number}) {
         </TableHead>
         <TableBody>
           {
-            data?.itensEmpenho && data.itensEmpenho.length > 0 && (
+            response?.data && response?.data.length > 0 && (
               <>
                 {
-                  data.itensEmpenho.map((row) => (
+                  response?.data.map((row) => (
                     <ItemEmpenhoRow key={row.idItemEmpenho} row={row} />
                   ))
                 }
@@ -68,7 +68,7 @@ export function ItensEmpenhoTable(props : {idEmpenho : number}) {
             )
           }
           {
-            isSuccess && !data && (
+            isSuccess && !response && (
               <span className='text-2xl w-fit absolute z-40 bottom-0'>
                 Nenhuma alteração de empenho foi encontrada.
               </span>
@@ -94,7 +94,7 @@ export function ItensEmpenhoTable(props : {idEmpenho : number}) {
             className='dark:bg-zinc-800 dark:text-zinc-50'
             component="div"
             rowsPerPage={rowsPerPage}
-            count={data.count ?? 0}
+            count={response.count ?? 0}
             page={page}
             onPageChange={handleChangePage} 
             onRowsPerPageChange={handleChangeRowsPerPage}

@@ -31,7 +31,7 @@ export function PagamentoDialogDetails (props : Props){
             queryClient.setQueryData(["get-pagamento-retencoes"], () => null);
             queryClient.setQueryData(["get-pagamento-estornos"], () => null);
         }
-    }, [props.open, queryClient, props.pagamento.idPagamento])
+    }, [props.open, queryClient, props.pagamento._id])
     return (
         <BootstrapDialog
             sx={{
@@ -72,8 +72,8 @@ export function PagamentoDialogDetails (props : Props){
                     </Button>
                 </DialogActions>
                 <main className="flex flex-col gap-3 ">
-                    <EstornoPagamentoTable idPagamento={props.pagamento.idPagamento}/>
-                    <PagamentoRetencaoTable idPagamento={props.pagamento.idPagamento}/>
+                    <EstornoPagamentoTable idPagamento={props.pagamento._id}/>
+                    <PagamentoRetencaoTable idPagamento={props.pagamento._id}/>
                 </main>
             </DialogContent>
         </BootstrapDialog>

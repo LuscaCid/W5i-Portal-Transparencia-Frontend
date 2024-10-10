@@ -32,11 +32,10 @@ export function EmpenhoDialogDetails (props : Props){
   const theme = useThemeContext(state => state.theme);
   const queryClient = useQueryClient();
   const { data : dotacao, isFetching, isSuccess } = useQuery({
-    queryKey : ["empenho-dotacao", props.empenho.idEmpenho],
+    queryKey : ["empenho-dotacao", props.empenho._id],
     queryFn : async () => {
-      console.log(props.empenho.idEmpenho);
       await delay();
-      const response = await api.get<Dotacao>(`despesas/getempenhodotacao?IdDotacao=${props.empenho.idDotacao}`);
+      const response = await api.get<Dotacao>(`despesas/empenhoDotacao/${props.empenho.idDotacao}`);
       return response.data;
     },
     refetchOnMount : true,
@@ -45,9 +44,9 @@ export function EmpenhoDialogDetails (props : Props){
   });
   useEffect(() => {
     if (!open){ 
-      queryClient.setQueryData(["empenho-dotacao", props.empenho.idEmpenho], () => null);
+      queryClient.setQueryData(["empenho-dotacao", props.empenho.idDotacao], () => null);
     }
-  }, [props.open, queryClient, props.empenho.idEmpenho])
+  }, [props.open, queryClient, props.empenho._id])
   return (
     <BootstrapDialog
       sx={{
@@ -214,11 +213,11 @@ export function EmpenhoDialogDetails (props : Props){
                   <TitleWithProgress 
                     title="Itens de empenho"
                   />
-                    <ItensEmpenhoTable idEmpenho={props.empenho.idEmpenho} />
+                    <ItensEmpenhoTable idEmpenho={props.empenho._id} />
                   <TitleWithProgress 
                     title="Alterações de empenho"
                   />
-                  <AlteracaoEmpenhoTable idEmpenho={props.empenho.idEmpenho} />
+                  <AlteracaoEmpenhoTable idEmpenho={props.empenho._id} />
                 </>
               )
           }

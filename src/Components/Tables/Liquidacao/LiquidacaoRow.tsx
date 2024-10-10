@@ -7,7 +7,7 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, PackageOpen } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import {  Button, Chip, Skeleton, TableFooter, TablePagination, Tooltip } from '@mui/material';
@@ -17,6 +17,7 @@ import { MoneyChip } from '../../MoneyChip';
 import { PagamentoDialogDetails } from '../../PagamentoDetailsDialog';
 import { formatDate } from '../../../Utils/dateFormated';
 import { GetLiquidacaoPagamentosResponse } from '../../../@types/DespesasResponse';
+import { delay } from '../../../Utils/delay';
 
 export function LiquidacaoRow (props : { row : Partial<Liquidacao>}) {
     const { row } = props;
@@ -24,25 +25,26 @@ export function LiquidacaoRow (props : { row : Partial<Liquidacao>}) {
     const [ actualIdSelected, setActualIdSelected ] = useState<number|undefined>(undefined);
     const [ page, setPage ] = useState<number>(0);
     const [ rowsPerPage, setRowsPerPage ] = useState(10);
-    const [isOpenDialog, setIsOpenDialog ] = useState(false);
+    const [ isOpenDialog, setIsOpenDialog ] = useState(false);
     const queryClient = useQueryClient();
+
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement>|null, newPage: number) => {
       if (event && event.isTrusted){ 
-        setPage(newPage)
-        return
+        setPage(newPage);
+        return;
       }
-      setPage(newPage)
+      setPage(newPage);
     };
     const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => 
-      {
-        const newCountOfRows = +event.target.value; 
-        setRowsPerPage(newCountOfRows)
-        setPage(0) //volta para a primeira pagina ao mudar o numero de linhas por pagina;
-      };
-    const { data, isSuccess,isFetching } = useQuery({
+    {
+      const newCountOfRows = +event.target.value; 
+      setRowsPerPage(newCountOfRows);
+      setPage(0);
+    };
+    const { data: response, isSuccess,isFetching } = useQuery({
       queryFn : async () => {
-        await new Promise(resolve => setTimeout(resolve, 700))
-        const response = await api.get<GetLiquidacaoPagamentosResponse>(`despesas/getliquidacaopagamentos?IdLiquidacao=${actualIdSelected}&Page=${page+1}&Limit=${rowsPerPage}`);
+        await delay();
+        const response = await api.get<GetLiquidacaoPagamentosResponse>(`despesas/liquidacaoPagamentos?idLiquidacao=${actualIdSelected}&Page=${page+1}&Limit=${rowsPerPage}`);
         console.log(response.data);
         return response.data;
       },
@@ -50,12 +52,16 @@ export function LiquidacaoRow (props : { row : Partial<Liquidacao>}) {
       enabled : open && actualIdSelected != null,
       refetchOnWindowFocus : false,
     });
-    useEffect(() => {
-      if (!open) {
+    useEffect(() =>
+    {
+      if (!open) 
+      {
         queryClient.setQueryData([`get-liquidacoes-pagamentos${actualIdSelected}`], () => []);
       }
     }, [open, actualIdSelected, queryClient]);
-    useEffect(() => {
+    
+    useEffect(() => 
+    {
       queryClient.refetchQueries({queryKey : [`get-liquidacoes-pagamentos${actualIdSelected}`]});
     }, [rowsPerPage , queryClient, page, actualIdSelected])
   
@@ -70,11 +76,11 @@ export function LiquidacaoRow (props : { row : Partial<Liquidacao>}) {
                   size="small"
                   onClick={() => {
                     setOpen(!open)
-                    setActualIdSelected(row.idLiquidacao);
+                    setActualIdSelected(row._id);
                   }}
                 >
                   {open ? <ChevronUp /> : <ChevronDown />}
-                </IconButton>
+              </IconButton>
             </Tooltip>
             </TableCell>
             <TableCell className='dark:text-zinc-100 text-md'>{row.nuLiquidacao}</TableCell>
@@ -119,10 +125,18 @@ export function LiquidacaoRow (props : { row : Partial<Liquidacao>}) {
                   </TableHead>
                   <TableBody>
                     {
-                      isSuccess && data.pagamentos && data.pagamentos.length > 0 &&  (
+                      isSuccess && response.data && response.data.length ===0 && (
+                        <TableFooter 
+                          className='text-2xl dark:text-zinc-200 w-fit m-auto opacity-60 text-center'>
+                          Nenhum pagamento foi encontrado... <PackageOpen />
+                       </TableFooter>
+                      )
+                    }
+                    {
+                      isSuccess && response.data && response.data.length > 0 && (
                         <>
                           {
-                            data.pagamentos.map((pagamento) => (
+                            response.data.map((pagamento) => (
                               <TableRow key={pagamento.dtCadastro}>
                                 <TableCell>
                                   <Tooltip title="Consultar retenções e estornos deste pagamento.">
@@ -162,14 +176,7 @@ export function LiquidacaoRow (props : { row : Partial<Liquidacao>}) {
                           }
                         </>
                       )
-                    }
-                    {
-                      !isFetching && !data && isSuccess && (
-                        <TableFooter className='text-lg dark:text-zinc-200 w-fit m-auto opacity-60 text-center'>
-                          Nenhum pagamento foi encontrado.
-                        </TableFooter>
-                      )
-                    }
+                  }
                   </TableBody>
                   
                 </Table>
@@ -189,14 +196,14 @@ export function LiquidacaoRow (props : { row : Partial<Liquidacao>}) {
                     <TablePagination
                       labelDisplayedRows={
                         (args) => (
-                          <>  {args.from} - {args.to} de {data.count} itens</>
+                          <>  {args.from} - {args.to} de {response.count} itens</>
                         )
                       }
                       labelRowsPerPage="Itens por página"
                       className='dark:bg-zinc-800 dark:text-zinc-50'
                       component="div"
                       rowsPerPage={rowsPerPage}
-                      count={data.count ??0}
+                      count={response.count ??0}
                       page={page}
                       onPageChange={handleChangePage} 
                       onRowsPerPageChange={handleChangeRowsPerPage}

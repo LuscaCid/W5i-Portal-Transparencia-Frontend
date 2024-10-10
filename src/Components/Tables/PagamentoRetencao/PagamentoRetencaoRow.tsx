@@ -7,7 +7,6 @@ import { Constants, TIPO_GUIA_RECOLHIMENTO } from '../../../Utils/Constants';
 
 export function PagamentoRetencaoRow (props : { row : Partial<PagamentoRetencao>}) {
     const { row } = props;
-    console.log(row.nuPercentual);
     return (
         <TableRow >
             <TableCell className='dark:text-zinc-100 text-md'>

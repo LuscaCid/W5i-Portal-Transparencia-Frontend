@@ -31,10 +31,10 @@ export function EstornoPagamentoTable(props : {idPagamento : number}) {
   {
     setRowsPerPage(+event.target.value);
   };
-  const { data, isFetching, isSuccess } = useQuery({
+  const { data: response, isFetching, isSuccess } = useQuery({
     queryFn : async () => {
       await delay();
-      const response = await api.get<GetEstornoPagamentosResponse>(`despesas/getestornopagamento?IdPagamento=${props.idPagamento}&Page=${page+1}&Limit=${rowsPerPage}`);
+      const response = await api.get<GetEstornoPagamentosResponse>(`despesas/estornosPagamento?idPagamento=${props.idPagamento}&Page=${page+1}&Limit=${rowsPerPage}`);
       console.log(response.data);
       return response.data;
     },
@@ -67,10 +67,10 @@ export function EstornoPagamentoTable(props : {idPagamento : number}) {
         </TableHead>
         <TableBody>
           {
-            data?.estornoPagamento && data?.estornoPagamento.length > 0 && (
+            response?.data && response?.data .length > 0 && (
               <>
                 {
-                  data.estornoPagamento.map((row) => (
+                  response?.data.map((row) => (
                     <EstornoPagamentoRow key={row.idEstornoPagamento} row={row} />
                   ))
                 }
@@ -85,7 +85,7 @@ export function EstornoPagamentoTable(props : {idPagamento : number}) {
         )
       }
       {
-        !isFetching && isSuccess && !data && (
+        !isFetching && isSuccess && response.data.length == 0 && (
           <span className='text-2xl flex items-center gap-2 w-fit absolute z-40 top-32 left-32 m-auto text-center opacity-70'>
             Nenhum estorno deste pagamento foi encontrado... <PackageOpen />
           </span>
@@ -96,14 +96,14 @@ export function EstornoPagamentoTable(props : {idPagamento : number}) {
           <TablePagination
             labelDisplayedRows={
               (args) => (
-              <>  {args.from} - {args.to} de {data.count} itens</>
+              <>  {args.from} - {args.to} de {response.count} itens</>
               )
             }
             labelRowsPerPage="Itens por página"
             className='dark:bg-zinc-800 dark:text-zinc-50'
             component="div"
             rowsPerPage={rowsPerPage}
-            count={data.count ?? 0}
+            count={response.count ?? 0}
             page={page}
             onPageChange={handleChangePage} 
             onRowsPerPageChange={handleChangeRowsPerPage}

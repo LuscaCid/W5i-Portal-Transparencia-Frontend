@@ -7,7 +7,7 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-import { ChevronDown, ChevronUp, Ellipsis } from 'lucide-react';
+import { ChevronDown, ChevronUp, Ellipsis, PackageOpen } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../../Services/api';
 import React, { ChangeEvent, useEffect, useState } from 'react';
@@ -44,16 +44,17 @@ export function EmpenhoRow(props: { row: Empenho }) {
       setRowsPerPage(newCountOfRows)
       setPage(0) //volta para a primeira pagina ao mudar o numero de linhas por pagina;
     };
-    const { data, isSuccess,isFetching } = useQuery({
+    const { data: response, isSuccess,isFetching } = useQuery({
       queryFn : async () => {
         await delay();
         const query = new URLSearchParams();
-
+        console.log(actualIdSelected);
         query.append("Page", (page+1).toString());
         query.append("Limit", (rowsPerPage).toString());
-        query.append("IdEmpenho", actualIdSelected!.toString());
+        query.append("idEmpenho", actualIdSelected!.toString());
         
-        const response = await api.get<GetEmpenhoLiquidacoesResponse>(`despesas/getempenholiquidacoes`, { params : query});
+        const response = await api.get<GetEmpenhoLiquidacoesResponse>(`despesas/liquidacoesEmpenho`, { params : query});
+        console.log(response.data);
         return response.data;
       },
       queryKey : [`get-empenhos-liquidacoes${actualIdSelected}`],
@@ -79,7 +80,7 @@ export function EmpenhoRow(props: { row: Empenho }) {
                 size="small"
                 onClick={() => {
                   setOpen(!open)
-                  setActualIdSelected(row.idEmpenho);
+                  setActualIdSelected(row._id);
                 }}
               >
                 {open ? <ChevronUp /> : <ChevronDown />}
@@ -157,25 +158,24 @@ export function EmpenhoRow(props: { row: Empenho }) {
                   </TableHead>
                   <TableBody className='relative min-h-[300px]'>
                     {
-                      isSuccess && data.liquidacoes && data.liquidacoes.length > 0 &&  (
+                      isSuccess && response.data && response.data.length === 0 && (
+                        <span className='text-2xl w-fit m-auto opacity-60 text-center'>
+                          Nenhuma liquidação foi encontrada... <PackageOpen />
+                        </span>
+                      )
+                    }
+                    {
+                      isSuccess && response.data && response.data.length > 0 &&  (
                         <>
                           {
-                            data.liquidacoes.map((liquidacao) => (
+                            response.data.map((liquidacao) => (
                               <LiquidacaoRow key={liquidacao.nuLiquidacao} row={liquidacao}/>
                             ))
                           }
                         </>
                       )
                     }
-                    {
-                      !isFetching && !data && isSuccess && (
-                        <span className='text-2xl w-fit m-auto opacity-60 text-center'>
-                          Nenhuma liquidação foi encontrada.
-                        </span>
-                      )
-                    }
                   </TableBody>
-                  
                 </Table>
                 {
                     isFetching && (
@@ -197,14 +197,14 @@ export function EmpenhoRow(props: { row: Empenho }) {
                     <TablePagination
                     labelDisplayedRows={
                       (args) => (
-                        <>  {args.from} - {args.to} de {data.count} itens</>
+                        <>  {args.from} - {args.to} de {response.count} itens</>
                       )
                     }
                       labelRowsPerPage="Itens por página"
                       className='dark:bg-zinc-800 dark:text-zinc-50'
                       component="div"
                       rowsPerPage={rowsPerPage}
-                      count={data.count ??0}
+                      count={response.count ??0}
                       page={page}
                       onPageChange={handleChangePage} 
                       onRowsPerPageChange={handleChangeRowsPerPage}

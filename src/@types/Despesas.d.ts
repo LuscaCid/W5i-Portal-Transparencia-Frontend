@@ -2,7 +2,7 @@ import { AcaoOrcamentaria } from "./AcaoOrcamentaria"
 import { PessoaFisica, PessoaJuridica } from "./Pessoa"
 
 export interface Empenho {
-    idEmpenho: number
+    _id: number
     nuEmpenho: string
     dtEmpenho: string
     tpEmpenho: string
@@ -106,7 +106,7 @@ interface PagamentoRetencao {
     cdPagamentoRetencao: string;         
 }
 interface EstornoPagamento {
-    idEstornoPagamento: number;      
+    _id: number;      
     cdEstornoPagamento: number;      
     dtEstornoPagamento: Date;        
     dsEstornoPagamento: string;      
@@ -145,7 +145,7 @@ export interface TipoDespesa {
 }
 
 export interface Liquidacao {
-    idLiquidacao: number
+    _id : number
     nuLiquidacao: string
     idEmpenho: number
     dtLiquidacao: string
@@ -173,7 +173,7 @@ export interface Liquidacao {
 }
 
 export interface Pagamento {
-    idPagamento: number
+    _id : number
     nuPagamento: string
     dtPagamento: string
     idLiquidacao: number
@@ -193,7 +193,7 @@ export interface Pagamento {
 }
 
 export interface ItemEmpenho {
-    idItemEmpenho: number
+    _id: number
     idEmpenho: number
     idProdutoServico: number
     idMetricaMedida: number
@@ -222,7 +222,7 @@ export interface ProdutoServico {
 }
 
 export interface AlteracaoEmpenho {
-    idAlteracaoEmpenho: number
+    _id: number
     idEmpenho: number
     cdAlteracaoEmpenho: string
     dtOperacao: string
